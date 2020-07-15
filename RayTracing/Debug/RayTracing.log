@@ -1,5 +1,2 @@
 ﻿  ImageGenerator.cpp
-D:\Development\RayTracing\RayTracing\RayTracing\ImageGenerator.cpp(31,34): warning C4244: '=': conversion from 'double' to 'uint8_t', possible loss of data
-D:\Development\RayTracing\RayTracing\RayTracing\ImageGenerator.cpp(32,34): warning C4244: '=': conversion from 'double' to 'uint8_t', possible loss of data
-D:\Development\RayTracing\RayTracing\RayTracing\ImageGenerator.cpp(33,34): warning C4244: '=': conversion from 'double' to 'uint8_t', possible loss of data
   RayTracing.vcxproj -> D:\Development\RayTracing\RayTracing\Debug\RayTracing.exe
