@@ -16,6 +16,7 @@ using namespace std;
 
 color ray_color(const ray& r);
 uint8_t double_to_imagespace(double x);
+bool hit_sphere(const point3& center, double radius, const ray& r);
 
 int main(int argc, char** args) {
 	const auto aspect_ratio = 16.0 / 9.0;
@@ -74,6 +75,8 @@ int main(int argc, char** args) {
 
 // This function finds the color of a specific ray in the scene according to a gradient.
 color ray_color(const ray& r) {
+	if (hit_sphere(point3(0, 0, -1), 0.5, r))
+		return color(1, 0, 0);
 	// This gets the direction of the vector in a unitary format.
 	vec3 unit_direction = unit_vector(r.direction());
 	// Gets the target position of the linear gradient blend only vertically.
@@ -86,4 +89,13 @@ color ray_color(const ray& r) {
 // This function translates a color from double to a uint8 value compatible with stb
 uint8_t double_to_imagespace(double x) {
 	return (int)round(x * 255);
+}
+
+bool hit_sphere(const point3& center, double radius, const ray& r) {
+	vec3 oc = r.origin() - center;
+	auto a = dot(r.direction(), r.direction());
+	auto b = 2.0 * dot(oc, r.direction());
+	auto c = dot(oc, oc) - radius * radius;
+	auto discriminant = b * b - 4 * a * c;
+	return (discriminant > 0);
 }
