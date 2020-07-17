@@ -139,11 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ImageGenerator.cpp" />
+    <ClCompile Include="raytracing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color.h" />
+    <ClInclude Include="primitive.h" />
+    <ClInclude Include="primitive_list.h" />
     <ClInclude Include="Ray.h" />
+    <ClInclude Include="raytracing.h" />
+    <ClInclude Include="sphere.h" />
     <ClInclude Include="stb\stb_image.h" />
     <ClInclude Include="stb\stb_image_resize.h" />
     <ClInclude Include="stb\stb_image_write.h" />
