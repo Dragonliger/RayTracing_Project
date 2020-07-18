@@ -57,6 +57,14 @@ public:
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
 
+	inline static vec3 random() {
+		return vec3(random_double(), random_double(), random_double());
+	}
+
+	inline static vec3 random(double min, double max) {
+		return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+	}
+
 // Variables
 public:
 	double e[3];
@@ -120,4 +128,19 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 // Getting the unitary value of the vector
 inline vec3 unit_vector(vec3 v) {
 	return v / v.magnitude();
+}
+
+vec3 random_in_unit_sphere() {
+	while (true) {
+		auto p = vec3::random(-1, 1);
+		if (p.magnitude_squared() >= 1) continue;
+		return p;
+	}
+}
+
+vec3 random_unit_vector() {
+	auto a = random_double(0, 2 * pi);
+	auto z = random_double(-1, 1);
+	auto r = sqrt(1 - z * z);
+	return vec3(r * cos(a), r * sin(a), z);
 }

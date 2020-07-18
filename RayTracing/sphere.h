@@ -19,8 +19,8 @@ public:
 bool sphere::hit(const ray& r, double tmin, double tmax, hit_record& rec) const {
 	// distance from the ray origin to the center of the sphere.
 	vec3 oc = r.origin() - center;
-	// Magnitude of the ray minus the square radius x^2 + y^2 + z^2 = r^2
-	auto a = r.direction().magnitude_squared() - radius * radius;
+	// Magnitude of the ray squared
+	auto a = r.direction().magnitude_squared();
 	auto half_b = dot(oc, r.direction());
 	auto c = oc.magnitude_squared() - radius * radius;
 	auto discriminant = half_b * half_b - a * c;
