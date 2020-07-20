@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <thread>
+#include <mutex>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -13,45 +15,70 @@
 #include "stb/stb_image_write.h"
 
 #define CHANNEL_NUM 3
+#define THREADS 5
 
 using namespace std;
 
+mutex default_mutex;
+
 color ray_color(const ray& r, const primitive& world, int depth);
 uint8_t double_to_imagespace(double x);
+primitive_list random_scene();
+void calculate_sample(int i, int j, int samples, const primitive_list& world, int max_depth, int image_width, int image_height, const camera& cam, color& result);
 
 int main(int argc, char** args) {
-	// Image constants
-	const auto aspect_ratio = 16.0 / 9.0;
-	const int image_width = 384;
+	//// Image constants
+	//const auto aspect_ratio = 16.0 / 9.0;
+	//const int image_width = 384;
+	//const int image_height = static_cast<int>(image_width / aspect_ratio);
+	//const int samples_per_pixel = 100;
+	//const int max_depth = 50;
+
+	// Random Scene
+	const auto aspect_ratio = 3.0 / 2.0;
+	const int image_width = 1200;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
-	const int samples_per_pixel = 100;
+	const int samples_per_pixel = 500;
 	const int max_depth = 50;
 
 	uint8_t* image = new uint8_t[image_width * image_height * CHANNEL_NUM];
 
 	cout << "Starting process\n";
 
-	// World
-	primitive_list world;
+	//// World
+	//primitive_list world;
 
-	auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-	auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-	auto material_left = make_shared<dielectric>(1.5);
-	auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
+	//auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+	//auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+	//auto material_left = make_shared<dielectric>(1.5);
+	//auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
 
-	world.add(make_shared<sphere>(point3(0, -100.5, -1), 100.0, material_ground));
-	world.add(make_shared<sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center));
-	world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
-	world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), -0.45, material_left));
-	world.add(make_shared<sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));
+	//world.add(make_shared<sphere>(point3(0, -100.5, -1), 100.0, material_ground));
+	//world.add(make_shared<sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center));
+	//world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
+	//world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), -0.45, material_left));
+	//world.add(make_shared<sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));
 
-	// Camera
-	point3 lookfrom(3, 3, 2);
-	point3 lookat(0, 0, -1);
+	//Random Scene
+	auto world = random_scene();
+
+	//// Camera
+	//point3 lookfrom(3, 3, 2);
+	//point3 lookat(0, 0, -1);
+	//vec3 vup(0, 1, 0);
+	//auto dist_to_focus = (lookfrom - lookat).magnitude();
+	//auto aperture = 2.0;
+	//camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
+
+	//Random Scene
+	point3 lookfrom(13, 2, 3);
+	point3 lookat(0, 0, 0);
 	vec3 vup(0, 1, 0);
-	auto dist_to_focus = (lookfrom - lookat).magnitude();
-	auto aperture = 2.0;
+	auto dist_to_focus = 10.0;
+	auto aperture = 0.1;
+
 	camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
+
 
 	// Render
 	int index = 0;
@@ -61,15 +88,17 @@ int main(int argc, char** args) {
 		for (int i = 0; i < image_width; ++i)
 		{			
 			color pixel_color(0,0,0);
-			for (int s = 0; s < samples_per_pixel; ++s) {
-				// Horizontal coordinate of the viewport
-				auto u = (i + random_double()) / (image_width - 1);
-				// Vertical coordinate of the viewport
-				auto v = (j + random_double()) / (image_height - 1);
-				// The ray goes from the origin to the current coordinates of the viewport.
-				ray r = cam.get_ray(u, v);
-				pixel_color += ray_color(r, world, max_depth);
-			}
+			thread t0(calculate_sample, i, j, samples_per_pixel / 5, world, max_depth, image_width, image_height, cam, ref(pixel_color));
+			thread t1(calculate_sample, i, j, samples_per_pixel / 5, world, max_depth, image_width, image_height, cam, ref(pixel_color));
+			thread t2(calculate_sample, i, j, samples_per_pixel / 5, world, max_depth, image_width, image_height, cam, ref(pixel_color));
+			thread t3(calculate_sample, i, j, samples_per_pixel / 5, world, max_depth, image_width, image_height, cam, ref(pixel_color));
+			thread t4(calculate_sample, i, j, samples_per_pixel / 5, world, max_depth, image_width, image_height, cam, ref(pixel_color));
+			t0.join();
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+
 			// We calculate the color and write it to an image.
 			auto r = pixel_color.x();
 			auto g = pixel_color.y();
@@ -124,4 +153,65 @@ color ray_color(const ray& r, const primitive& world, int depth) {
 // This function translates a color from double to a uint8 value compatible with stb
 uint8_t double_to_imagespace(double x) {
 	return static_cast<int>(x);
+}
+
+primitive_list random_scene() {
+	primitive_list world;
+
+	auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
+	for (int a = -11; a < 11; a++) {
+		for (int b = -11; b < 11; b++) {
+			auto choose_mat = random_double();
+			point3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
+
+			if ((center - point3(4, 0.2, 0)).magnitude() > 0.9) {
+				shared_ptr<material> sphere_material;
+				if (choose_mat < 0.8) {
+					// diffuse material
+					auto albedo = color::random() * color::random();
+					sphere_material = make_shared<lambertian>(albedo);
+					world.add(make_shared<sphere>(center, 0.2, sphere_material));
+				}
+				else if (choose_mat < 0.95) {
+					// metal
+					auto albedo = color::random(0.5, 1);
+					auto fuzz = random_double(0, 0.5);
+					sphere_material = make_shared<metal>(albedo, fuzz);
+					world.add(make_shared<sphere>(center, 0.2, sphere_material));
+				}
+				else {
+					// glass
+					sphere_material = make_shared<dielectric>(1.5);
+					world.add(make_shared<sphere>(center, 0.2, sphere_material));
+				}
+			}
+		}
+	}
+
+	auto material1 = make_shared<dielectric>(1.5);
+	world.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
+
+	auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
+	world.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
+
+	auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+	world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
+
+	return world;
+}
+
+void calculate_sample(int i, int j, int samples, const primitive_list& world, int max_depth, int image_width, int image_height, const camera& cam, color& result) {
+	color tmpColor{};
+	for (auto iter = samples; iter > 0; --iter) {
+		// Horizontal coordinate of the viewport
+		auto u = (i + random_double()) / (image_width - 1);
+		// Vertical coordinate of the viewport
+		auto v = (j + random_double()) / (image_height - 1);
+		// The ray goes from the origin to the current coordinates of the viewport.
+		ray r = cam.get_ray(u, v);
+		tmpColor += ray_color(r, world, max_depth);
+	}
+	lock_guard<mutex> lockGuard(default_mutex);
+	result += tmpColor;
 }
