@@ -18,4 +18,10 @@ The program was made in Visual Studio 2019. To run build it using Visual Studio 
 
 ![It may be just a gradient but it's 3D](https://i.imgur.com/M4OgsK3.png)
 
-The first step is to output an image, I used the [STB Library](https://github.com/nothings/stb) to help me output a bpm image instead of using the suggested PPM one, it felt like it made more sense. The main difference is that the channel values were written sequentially which had some repercutions in sectioning the program. Using a basic viewport the program simulates a gradient background.
+The first step is to output an image, I used the [STB Library](https://github.com/nothings/stb) to help me output a bpm image instead of using the suggested PPM one, it felt like it made more sense. The main difference is that the channel values were written sequentially which had some repercutions in sectioning the program. Using a basic viewport the program simulates a gradient background. 
+
+It does this by sending rays towards a viewport that establishes what the colors of it should be. The rays are essentially vectors that have an origin in the center of the space and shoot out forward into the shape of the viewport, in this case rectangular and with a 16:9 aspect ratio.
+
+After getting the values from the rays in the scene we store them in a one dimensional array that then goes through STB to create a BMP image file.
+
+## Second step: 
