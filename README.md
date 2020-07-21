@@ -24,4 +24,18 @@ It does this by sending rays towards a viewport that establishes what the colors
 
 After getting the values from the rays in the scene we store them in a one dimensional array that then goes through STB to create a BMP image file.
 
-## Second step: 
+## Second step: Normals with a small hiccup
+
+![Sphere painted in Normals](https://i.imgur.com/Roct9cq.png)
+
+The following step is to create our first object, in this case a sphere which is ideal because of it's simple equation that allows us to make one quickly and get all of its related geometric properties. 
+
+To render a sphere it is really important to understand what is the outside and what is the inside of the sphere as we only want to render what is outside. To do that we calculate a unit vector coming from the place the ray hit and use it to calculate the color.
+
+At this point we are also including different objects so we introduce a list of primitives to hold all of our objects, in this case two spheres.
+
+![Normals but my equation is slightly off](https://i.imgur.com/QbeO6Re.png)
+
+But there is also the possibility that you get an equation wrong and you accidentally turn the shading into a squared wave of color that becomes smaller at the edges like this.
+
+## Third step: 
